@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copa de Rua 3x3</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #000;
+      color: #d4ff00;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    .container {
+      text-align: center;
+      background: #111;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #d4ff00;
+      width: 90%;
+      max-width: 400px;
+      transition: all 0.3s ease;
+    }
+    .titulo {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #d4ff00;
+    }
+    .btn {
+      background: #d4ff00;
+      color: #000;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background: #b6e600;
+      transform: scale(1.05);
+    }
+    .formulario {
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    input, select {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 1em;
+    }
+    input:focus, select:focus {
+      box-shadow: 0 0 10px #d4ff00;
+    }
+    .logout {
+      margin-top: 15px;
+      background: transparent;
+      color: #d4ff00;
+      border: 1px solid #d4ff00;
+    }
+    .logout:hover {
+      background: #d4ff00;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="login-container">
+    <h1 class="titulo">Copa de Rua 3x3</h1>
+    <p>Faça login para se inscrever no torneio!</p>
+    <button id="google-login" class="btn">Entrar com Google</button>
+  </div>
+
+  <div class="container" id="form-container" style="display:none;">
+    <h1 class="titulo">Inscrição</h1>
+    <form class="formulario" id="formulario">
+      <input type="text" id="nomeTime" placeholder="Nome do Time" required />
+      <input type="text" id="capitao" placeholder="Capitão do Time" required />
+      <input type="tel" id="telefone" placeholder="Telefone" required />
+      <input type="email" id="email" placeholder="E-mail" required />
+      <select id="categoria" required>
+        <option value="">Categoria</option>
+        <option>Sub-15</option>
+        <option>Sub-17</option>
+        <option>Adulto</option>
+      </select>
+      <button type="submit" class="btn">Enviar Inscrição</button>
+    </form>
+    <button id="logout" class="btn logout">Sair</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } 
+      from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js";
+
+    // 🔥 Suas credenciais Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAXGpG86tmkQD1zuXStQRfXfQ70C0idg70",
+      authDomain: "copaderua3x3lfb.firebaseapp.com",
+      projectId: "copaderua3x3lfb",
+      storageBucket: "copaderua3x3lfb.firebasestorage.app",
+      messagingSenderId: "768238536997",
+      appId: "1:768238536997:web:112029a70f37614f72b2cc",
+      measurementId: "G-YNH9HC8EX4"
+    };
+
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const loginContainer = document.getElementById("login-container");
+    const formContainer = document.getElementById("form-container");
+    const googleLogin = document.getElementById("google-login");
+    const logoutBtn = document.getElementById("logout");
+    const formulario = document.getElementById("formulario");
+
+    // Login com Google
+    googleLogin.addEventListener("click", async () => {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        loginContainer.style.display = "none";
+        formContainer.style.display = "block";
+        alert(`Bem-vindo, ${user.displayName}!`);
+        document.getElementById("email").value = user.email;
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao fazer login com Google.");
+      }
+    });
+
+    // Logout
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      formContainer.style.display = "none";
+      loginContainer.style.display = "block";
+    });
+
+    // Enviar inscrição (ainda local — pode ser conectado ao Firestore)
+    formulario.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const inscricao = {
+        nomeTime: nomeTime.value,
+        capitao: capitao.value,
+        telefone: telefone.value,
+        email: email.value,
+        categoria: categoria.value
+      };
+      console.log("Inscrição enviada:", inscricao);
+      alert("Inscrição enviada com sucesso!");
+      formulario.reset();
+    });
+  </script>
+</body>
+  </html>
