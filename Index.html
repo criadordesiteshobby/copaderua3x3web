@@ -3,108 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Copa de Rua 3x3</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: #000;
-      color: #d4ff00;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-    }
-    .container {
-      text-align: center;
-      background: #111;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 0 20px #d4ff00;
-      width: 90%;
-      max-width: 400px;
-      transition: all 0.3s ease;
-    }
-    .titulo {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-      text-shadow: 0 0 10px #d4ff00;
-    }
-    .btn {
-      background: #d4ff00;
-      color: #000;
-      border: none;
-      padding: 15px 25px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .btn:hover {
-      background: #b6e600;
-      transform: scale(1.05);
-    }
-    .formulario {
-      display: none;
-      flex-direction: column;
-      gap: 15px;
-      margin-top: 20px;
-    }
-    input, select {
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      outline: none;
-      font-size: 1em;
-    }
-    input:focus, select:focus {
-      box-shadow: 0 0 10px #d4ff00;
-    }
-    .logout {
-      margin-top: 15px;
-      background: transparent;
-      color: #d4ff00;
-      border: 1px solid #d4ff00;
-    }
-    .logout:hover {
-      background: #d4ff00;
-      color: #000;
-    }
-  </style>
-</head>
-<body>
-  <div class="container" id="login-container">
-    <h1 class="titulo">Copa de Rua 3x3</h1>
-    <p>Faça login para se inscrever no torneio!</p>
-    <button id="google-login" class="btn">Entrar com Google</button>
-  </div>
-
-  <div class="container" id="form-container" style="display:none;">
-    <h1 class="titulo">Inscrição</h1>
-    <form class="formulario" id="formulario">
-      <input type="text" id="nomeTime" placeholder="Nome do Time" required />
-      <input type="text" id="capitao" placeholder="Capitão do Time" required />
-      <input type="tel" id="telefone" placeholder="Telefone" required />
-      <input type="email" id="email" placeholder="E-mail" required />
-      <select id="categoria" required>
-        <option value="">Categoria</option>
-        <option>Sub-15</option>
-        <option>Sub-17</option>
-        <option>Adulto</option>
-      </select>
-      <button type="submit" class="btn">Enviar Inscrição</button>
-    </form>
-    <button id="logout" class="btn logout">Sair</button>
-  </div>
-
+  <title>Copa de Rua 3x3 - Inscrição</title>
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } 
-      from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js";
+    // Importa Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-    // 🔥 Suas credenciais Firebase
+    // Config do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAXGpG86tmkQD1zuXStQRfXfQ70C0idg70",
       authDomain: "copaderua3x3lfb.firebaseapp.com",
@@ -117,52 +22,131 @@
 
     // Inicializa Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    const loginContainer = document.getElementById("login-container");
-    const formContainer = document.getElementById("form-container");
-    const googleLogin = document.getElementById("google-login");
-    const logoutBtn = document.getElementById("logout");
-    const formulario = document.getElementById("formulario");
+    const loginBtn = document.getElementById("login-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+    const inscricaoForm = document.getElementById("form-inscricao");
+    const userInfo = document.getElementById("user-info");
 
-    // Login com Google
-    googleLogin.addEventListener("click", async () => {
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        loginContainer.style.display = "none";
-        formContainer.style.display = "block";
-        alert(`Bem-vindo, ${user.displayName}!`);
-        document.getElementById("email").value = user.email;
-      } catch (error) {
-        console.error(error);
-        alert("Erro ao fazer login com Google.");
-      }
+    loginBtn.addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          userInfo.innerHTML = `<p>Bem-vindo, ${user.displayName}!</p>`;
+          loginBtn.style.display = "none";
+          inscricaoForm.style.display = "block";
+          logoutBtn.style.display = "inline-block";
+        })
+        .catch((error) => {
+          alert("Erro ao logar: " + error.message);
+        });
     });
 
-    // Logout
-    logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      formContainer.style.display = "none";
-      loginContainer.style.display = "block";
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth).then(() => {
+        inscricaoForm.style.display = "none";
+        logoutBtn.style.display = "none";
+        loginBtn.style.display = "inline-block";
+        userInfo.innerHTML = "";
+      });
     });
+  </script>
 
-    // Enviar inscrição (ainda local — pode ser conectado ao Firestore)
-    formulario.addEventListener("submit", (e) => {
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("SEU_USER_ID_EMAILJS"); // ⚠️ troque por seu ID do EmailJS
+    })();
+  </script>
+
+  <style>
+    body {
+      background-color: #000;
+      color: #d0ff00;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+
+    button {
+      background-color: #d0ff00;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 10px;
+    }
+
+    form {
+      display: none;
+      max-width: 400px;
+      margin: 20px auto;
+      text-align: left;
+      background: #111;
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #d0ff00;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏀 Copa de Rua 3x3 🏀</h1>
+  <p id="user-info"></p>
+  <button id="login-btn">Entrar com Google</button>
+  <button id="logout-btn" style="display:none;">Sair</button>
+
+  <form id="form-inscricao">
+    <label>Nome completo:</label>
+    <input type="text" id="nome" required>
+    <label>Idade:</label>
+    <input type="number" id="idade" required>
+    <label>Cidade:</label>
+    <input type="text" id="cidade" required>
+    <label>Bairro:</label>
+    <input type="text" id="bairro" required>
+    <button type="submit">Enviar inscrição</button>
+  </form>
+
+  <script>
+    const form = document.getElementById("form-inscricao");
+
+    form.addEventListener("submit", function(e){
       e.preventDefault();
-      const inscricao = {
-        nomeTime: nomeTime.value,
-        capitao: capitao.value,
-        telefone: telefone.value,
-        email: email.value,
-        categoria: categoria.value
+
+      const params = {
+        nome: document.getElementById("nome").value,
+        idade: document.getElementById("idade").value,
+        cidade: document.getElementById("cidade").value,
+        bairro: document.getElementById("bairro").value,
+        emailDestino: "brziinspfc@gmail.com"
       };
-      console.log("Inscrição enviada:", inscricao);
-      alert("Inscrição enviada com sucesso!");
-      formulario.reset();
+
+      emailjs.send("SEU_SERVICE_ID", "SEU_TEMPLATE_ID", params)
+        .then(() => {
+          alert("Inscrição enviada com sucesso!");
+          form.reset();
+        })
+        .catch(err => {
+          alert("Erro ao enviar: " + err.text);
+        });
     });
   </script>
 </body>
-  </html>
+</html>
